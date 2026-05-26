@@ -1,73 +1,92 @@
 import React, { useEffect, useState } from "react";
 
+const API_URL = "https://hospital-backend-nx1z.onrender.com/patients";
+
 function App() {
-  const [patients, setPatients] = useState([]);
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [disease, setDisease] = useState("");
+    const [patients, setPatients] = useState([]);
+    const [name, setName] = useState("");
+    const [age, setAge] = useState("");
+    const [disease, setDisease] = useState("");
 
-  useEffect(() => {
-    fetch("http://localhost:8082/patients")
-        .then((res) => res.json())
-        .then((data) => setPatients(data));
-  }, []);
+    useEffect(() => {
+        fetch(API_URL)
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error("Failed to fetch patients");
+                }
+                return res.json();
+            })
+            .then((data) => setPatients(data))
+            .catch((error) => console.error(error));
+    }, []);
 
-  const addPatient = async () => {
-    const response = await fetch("http://localhost:8082/patients", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        age: parseInt(age),
-        disease,
-      }),
-    });
+    const addPatient = async () => {
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: name,
+                    age: parseInt(age),
+                    disease: disease,
+                }),
+            });
 
-    const newPatient = await response.json();
+            if (!response.ok) {
+                throw new Error("Failed to add patient");
+            }
 
-    setPatients([...patients, newPatient]);
-    setName("");
-    setAge("");
-    setDisease("");
-  };
+            const newPatient = await response.json();
 
-  return (
-      <div style={{ padding: "30px" }}>
-        <h1>Hospital Management System</h1>
+            setPatients([...patients, newPatient]);
+            setName("");
+            setAge("");
+            setDisease("");
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
-        <input
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-        />
+    return (
+        <div style={{ padding: "30px" }}>
+            <h1>Hospital Management System</h1>
 
-        <input
-            placeholder="Age"
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
-        />
+            <input
+                type="text"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+            />
 
-        <input
-            placeholder="Disease"
-            value={disease}
-            onChange={(e) => setDisease(e.target.value)}
-        />
+            <input
+                type="number"
+                placeholder="Age"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+            />
 
-        <button onClick={addPatient}>Add Patient</button>
+            <input
+                type="text"
+                placeholder="Disease"
+                value={disease}
+                onChange={(e) => setDisease(e.target.value)}
+            />
 
-        <h2>Patients</h2>
+            <button onClick={addPatient}>Add Patient</button>
 
-        <ul>
-          {patients.map((patient) => (
-              <li key={patient.id}>
-                {patient.name} - {patient.age} - {patient.disease}
-              </li>
-          ))}
-        </ul>
-      </div>
-  );
+            <h2>Patients</h2>
+
+            <ul>
+                {patients.map((patient) => (
+                    <li key={patient.id}>
+                        {patient.name} - {patient.age} - {patient.disease}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
 }
 
 export default App;
