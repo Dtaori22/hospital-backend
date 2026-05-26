@@ -1,23 +1,18 @@
 import React, { useEffect, useState } from "react";
 
-const API_URL = "https://hospital-backend-nx1z.onrender.com/patients";
-
 function App() {
     const [patients, setPatients] = useState([]);
     const [name, setName] = useState("");
     const [age, setAge] = useState("");
     const [disease, setDisease] = useState("");
 
+    const API_URL = "https://hospital-backend-nx1z.onrender.com/patients";
+
     useEffect(() => {
         fetch(API_URL)
-            .then((res) => {
-                if (!res.ok) {
-                    throw new Error("Failed to fetch patients");
-                }
-                return res.json();
-            })
+            .then((res) => res.json())
             .then((data) => setPatients(data))
-            .catch((error) => console.error(error));
+            .catch((err) => console.log(err));
     }, []);
 
     const addPatient = async () => {
@@ -28,24 +23,20 @@ function App() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    name: name,
+                    name,
                     age: parseInt(age),
-                    disease: disease,
+                    disease,
                 }),
             });
 
-            if (!response.ok) {
-                throw new Error("Failed to add patient");
-            }
-
             const newPatient = await response.json();
-
             setPatients([...patients, newPatient]);
+
             setName("");
             setAge("");
             setDisease("");
         } catch (error) {
-            console.error(error);
+            console.log(error);
         }
     };
 
